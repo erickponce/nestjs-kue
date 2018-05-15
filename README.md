@@ -124,6 +124,13 @@ createJob(@Res() res) {
 **For more options and details, please check Kue docs**
 <p><a href="https://github.com/Automattic/kue" target="blank">Kue</a></p>
 
+## Debug
+**You can enable some debug logs with KUE_DEBUG environment variable:**
+
+```node
+KUE_DEBUG=true
+```
+
 ## Kue UI
 <p>It's possible to view info about tasks being executed with the default Kue UI</p>
 <p>To enable it, set KUE_UI_ENABLED environment variable to true:</p>
@@ -136,7 +143,7 @@ KUE_UI_ENABLED = true
 <p>The default UI port is 3050, but if you like to change it use KUE_UI_PORT environment variable:</p>
 
 ```node
-KUE_UI_PORT = 3050
+KUE_UI_PORT=3050
 ```
 
 ## People
