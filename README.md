@@ -14,10 +14,10 @@ $ npm install --save nestjs-kue
 
 **This module uses REDIS to operate, and utilizes the following environment variables and the default values as configurations:**
 
-- REDIS_PREFIX  # Default 'q' 
-- REDIS_HOST  # Default 'localhost'
-- REDIS_PORT  # Default 6379
-- REDIS_DB  # Default 0
+- KUE_REDIS_PREFIX  # Default 'q' 
+- KUE_REDIS_HOST  # Default 'localhost'
+- KUE_REDIS_PORT  # Default 6379
+- KUE_REDIS_DB  # Default 0
 
 
 ## Usage
@@ -137,7 +137,7 @@ KUE_DEBUG=true
 <p>WARNING: The UI will be deployed using express!</p>
 
 ```node
-KUE_UI_ENABLED = true 
+KUE_UI_ENABLED=true 
 ```
 
 <p>The default UI port is 3050, but if you like to change it use KUE_UI_PORT environment variable:</p>
