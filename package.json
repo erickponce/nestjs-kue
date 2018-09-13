@@ -1,6 +1,6 @@
 {
   "name": "nestjs-kue",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Kue wrapper for NestJS framework",
   "author": "Erick Ponce Leão <erickponceleao@gmail.com>",
   "license": "MIT",
@@ -20,11 +20,12 @@
     "reflect-metadata": "^0.1.12"
   },
   "devDependencies": {
-    "@types/reflect-metadata": "^0.1.0",
     "@types/kue": "^0.11.7",
+    "@types/reflect-metadata": "^0.1.0",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.2",
     "gulp-watch": "^4.3.11",
-    "tslint-eslint-rules": "^4.1.1"
+    "tslint-eslint-rules": "^4.1.1",
+    "typescript": "^3.0.3"
   }
 }
