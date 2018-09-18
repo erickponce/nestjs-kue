@@ -25,12 +25,21 @@ export class KueService {
     ) {
         this.redisConfig = {
             prefix: process.env.KUE_REDIS_PREFIX,
-            redis: {
-                port: process.env.KUE_REDIS_PORT,
-                host: process.env.KUE_REDIS_HOST,
-                db: process.env.KUE_REDIS_DB
-            }
         };
+
+        if (process.env.KUE_REDIS_URI) {
+            this.redisConfig = {
+                ...this.redisConfig, redis: process.env.KUE_REDIS_URI,
+            };
+        } else {
+            this.redisConfig = {
+                ...this.redisConfig, redis: {
+                    port: process.env.KUE_REDIS_PORT,
+                    host: process.env.KUE_REDIS_HOST,
+                    db: process.env.KUE_REDIS_DB,
+                },
+            };
+        }
 
         this.queues[KueService.DEFAULT_QUEUE_NAME] = this.createQueue(KueService.DEFAULT_QUEUE_NAME);
         if ((eval(process.env.KUE_UI_ENABLED) || false)) {
