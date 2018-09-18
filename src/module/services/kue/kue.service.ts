@@ -40,6 +40,13 @@ export class KueService {
                 },
             };
         }
+
+        this.queues[KueService.DEFAULT_QUEUE_NAME] = this.createQueue(KueService.DEFAULT_QUEUE_NAME);
+        if ((eval(process.env.KUE_UI_ENABLED) || false)) {
+            const uiPort: number = parseInt(process.env.KUE_UI_PORT, null) || 3050;
+            kue.app.listen(uiPort, '0.0.0.0',);
+            this.fancyLogger.info('KueModule', `UI started on port ${uiPort}`, 'UI');
+        }
     }
 
     registerTask(task: (job, done) => void, metadata: TaskMetadata, ctrl: Controller) {
