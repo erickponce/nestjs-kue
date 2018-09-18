@@ -25,12 +25,21 @@ export class KueService {
     ) {
         this.redisConfig = {
             prefix: process.env.KUE_REDIS_PREFIX,
-            redis: {
-                port: process.env.KUE_REDIS_PORT,
-                host: process.env.KUE_REDIS_HOST,
-                db: process.env.KUE_REDIS_DB
-            }
         };
+
+        if (process.env.KUE_REDIS_URI) {
+            this.redisConfig = {
+                ...this.redisConfig, redis: process.env.KUE_REDIS_URI,
+            };
+        } else {
+            this.redisConfig = {
+                ...this.redisConfig, redis: {
+                    port: process.env.KUE_REDIS_PORT,
+                    host: process.env.KUE_REDIS_HOST,
+                    db: process.env.KUE_REDIS_DB,
+                },
+            };
+        }
     }
 
     registerTask(task: (job, done) => void, metadata: TaskMetadata, ctrl: Controller) {
@@ -53,8 +62,8 @@ export class KueService {
         let queue: kue.Queue = kue.createQueue(this.redisConfig);
         queue.setMaxListeners(0);
 
-        if (!this.debugActive && 
-            process.env.KUE_DEBUG && 
+        if (!this.debugActive &&
+            process.env.KUE_DEBUG &&
             queueName == KueService.DEFAULT_QUEUE_NAME) {
             this.debugActive = true;
             this.bindDebugQueueEvents(queue);
