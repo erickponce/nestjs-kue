@@ -60,8 +60,8 @@ export class KueService {
         let queue: kue.Queue = kue.createQueue(this.redisConfig);
         queue.setMaxListeners(0);
 
-        if (!this.debugActive && 
-            process.env.KUE_DEBUG && 
+        if (!this.debugActive &&
+            process.env.KUE_DEBUG &&
             queueName == KueService.DEFAULT_QUEUE_NAME) {
             this.debugActive = true;
             this.bindDebugQueueEvents(queue);

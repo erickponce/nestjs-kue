@@ -18,7 +18,9 @@ $ npm install --save nestjs-kue
 - KUE_REDIS_HOST  # Default 'localhost'
 - KUE_REDIS_PORT  # Default 6379
 - KUE_REDIS_DB  # Default 0
+- KUE_REDIS_URI
 
+For information on how to construct the redis URI see https://github.com/Automattic/kue#redis-connection-settings
 
 ## Usage
 
