@@ -110,4 +110,15 @@ export class KueService {
         if (metadata.backoff) job.backoff(metadata.backoff);
         return job;
     }
+    
+    getJob(id: string): Promise<kue.Job> {
+      return new Promise((resolve, reject) => {
+          kue.Job.get(id, (err, job: kue.Job) => {
+              if (err) {
+                  return reject(err);
+              }
+              return resolve(job);
+          });
+      });
+    }
 }
