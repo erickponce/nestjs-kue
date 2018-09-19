@@ -19,6 +19,10 @@ $ npm install --save nestjs-kue
 - KUE_REDIS_PORT  # Default 6379
 - KUE_REDIS_DB  # Default 0
 
+As of 0.2.0 version, you are able to use connection URI using *KUE_REDIS_URI* variable like:
+
+redis://example.com:1234?redis_option=value&redis_option=value
+
 
 ## Usage
 
