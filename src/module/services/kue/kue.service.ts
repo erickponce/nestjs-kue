@@ -18,7 +18,9 @@ export class KueService {
     private queues: { [name: string]: kue.Queue } = {};
     private tasks: { [name: string]: TaskMetadata } = {};
     private debugActive: boolean = false;
-    private redisConfig;
+    private redisConfig = {
+        prefix: process.env.KUE_REDIS_PREFIX,
+    };
 
     constructor(
         private readonly fancyLogger: FancyLoggerService
