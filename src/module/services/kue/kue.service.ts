@@ -15,11 +15,12 @@ export class KueService {
         'job failed',
     ];
 
-    private queues: { [name: string]: kue.Queue } = {};
+    public queues: { [name: string]: kue.Queue } = {};
     private tasks: { [name: string]: TaskMetadata } = {};
     private debugActive: boolean = false;
     private redisConfig = {
         prefix: process.env.KUE_REDIS_PREFIX,
+        redis: null,
     };
 
     constructor(
@@ -113,7 +114,7 @@ export class KueService {
     
     getJob(id: string): Promise<kue.Job> {
       return new Promise((resolve, reject) => {
-          kue.Job.get(id, (err, job: kue.Job) => {
+          kue.Job.get(parseInt(id, null), (err, job: kue.Job) => {
               if (err) {
                   return reject(err);
               }
