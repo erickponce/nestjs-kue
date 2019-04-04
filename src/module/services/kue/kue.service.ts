@@ -54,13 +54,15 @@ export class KueService {
         if (!this.queues[queueName]) {
             this.queues[queueName] = this.createQueue(queueName);
         }
-        this.queues[queueName].process(metadata.name, concurrency, async (j, d) => {
-            try {
-                await Promise.resolve(task.call(ctrl, j, d));
-            } catch (err) {
-                d(err);
-            }
-        });
+        if ((eval(process.env.KUE_START_PROCESSING) || true)) {
+            this.queues[queueName].process(metadata.name, concurrency, async (j, d) => {
+                try {
+                    await Promise.resolve(task.call(ctrl, j, d));
+                } catch (err) {
+                    d(err);
+                }
+            });
+        }
         this.tasks[metadata.name] = metadata;
     }
 
