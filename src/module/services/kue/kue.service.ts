@@ -22,9 +22,11 @@ export class KueService {
         prefix: process.env.KUE_REDIS_PREFIX,
         redis: null,
     };
+    private ddTracer;
+    private ddServiceName: string;
 
     constructor(
-        private readonly fancyLogger: FancyLoggerService
+        private readonly fancyLogger: FancyLoggerService,
     ) {
         if (process.env.KUE_REDIS_URI) {
             this.redisConfig = {
@@ -48,6 +50,11 @@ export class KueService {
         }
     }
 
+    setDDTracer(ddTracer) {
+        this.ddTracer = ddTracer;
+        this.ddServiceName = `${this.ddTracer._tracer._service}-kue`;
+    }
+
     registerTask(task: (job, done) => void, metadata: TaskMetadata, ctrl: Controller) {
         let queueName: string = metadata.queue || KueService.DEFAULT_QUEUE_NAME;
         let concurrency: number = metadata.concurrency || KueService.DEFAULT_CONCURRENCY;
@@ -55,10 +62,41 @@ export class KueService {
             this.queues[queueName] = this.createQueue(queueName);
         }
         this.queues[queueName].process(metadata.name, concurrency, async (j, d) => {
+            let span;
+
             try {
-                await Promise.resolve(task.call(ctrl, j, d));
+                if (!this.ddTracer) {
+                    await Promise.resolve(task.call(ctrl, j, d));
+                } else {
+                    span = this.ddTracer.startSpan('worker.task');
+                    span.addTags({
+                        'resource.name': metadata.name,
+                        'service.name': this.ddServiceName,
+                    });
+    
+                    await this.ddTracer.scope().activate(span, () => {
+                        return task.call(ctrl, j, d);
+                    });
+                }
             } catch (err) {
+                if (span) {
+                    span.addTags({
+                        'error.type': err.name,
+                        'error.msg': err.message,
+                        'error.stack': err.stack
+                    });
+                }
                 d(err);
+            } finally {
+                if (span) {
+                    if (j._error === 'TTL exceeded') {
+                        span.addTags({
+                            'error.type': j._error,
+                            'error.msg': `Task execution time exceeded TTL of ${j._ttl} milliseconds`,
+                        });
+                    }
+                    span.finish();
+                }
             }
         });
         this.tasks[metadata.name] = metadata;

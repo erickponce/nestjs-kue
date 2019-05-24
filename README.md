@@ -135,6 +135,17 @@ createJob(@Res() res) {
 KUE_DEBUG=true
 ```
 
+## Datadog integration
+
+**From version 0.3.0 and above, there are the ability to send execution stats to datadog monitoring service: [Datadog](https://www.datadoghq.com)**
+
+To setup datadog, all you need to do is call the method `setDDTracer(tracer)` on `taskRegister` service with your Datadog `tracer` object as the parameter.
+
+```node
+this.taskRegister.setDDTracer(tracer);
+```
+
+
 ## Kue UI
 <p>It's possible to view info about tasks being executed with the default Kue UI</p>
 <p>To enable it, set KUE_UI_ENABLED environment variable to true:</p>

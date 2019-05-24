@@ -29,6 +29,10 @@ export class KueTaskRegisterService {
         this.moduleRef = moduleRef;
     }
 
+    setDDTracer(tracer) {
+        this.kueService.setDDTracer(tracer);
+    }
+
     register(tasks) {
         if (!this.moduleRef) {
             throw new InvalidModuleRefException();
