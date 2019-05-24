@@ -24,6 +24,7 @@ export class KueService {
     };
     private ddTracer;
     private ddServiceName: string;
+    private autoStartProcessing: boolean;
 
     constructor(
         private readonly fancyLogger: FancyLoggerService,
@@ -41,6 +42,7 @@ export class KueService {
                 },
             };
         }
+        this.autoStartProcessing = (eval(process.env.KUE_START_PROCESSING) || true);
 
         this.queues[KueService.DEFAULT_QUEUE_NAME] = this.createQueue(KueService.DEFAULT_QUEUE_NAME);
         if ((eval(process.env.KUE_UI_ENABLED) || false)) {
@@ -61,44 +63,46 @@ export class KueService {
         if (!this.queues[queueName]) {
             this.queues[queueName] = this.createQueue(queueName);
         }
-        this.queues[queueName].process(metadata.name, concurrency, async (j, d) => {
-            let span;
+        if (this.autoStartProcessing) {
+            this.queues[queueName].process(metadata.name, concurrency, async (j, d) => {
+                let span;
 
-            try {
-                if (!this.ddTracer) {
-                    await Promise.resolve(task.call(ctrl, j, d));
-                } else {
-                    span = this.ddTracer.startSpan('worker.task');
-                    span.addTags({
-                        'resource.name': metadata.name,
-                        'service.name': this.ddServiceName,
-                    });
-    
-                    await this.ddTracer.scope().activate(span, () => {
-                        return task.call(ctrl, j, d);
-                    });
-                }
-            } catch (err) {
-                if (span) {
-                    span.addTags({
-                        'error.type': err.name,
-                        'error.msg': err.message,
-                        'error.stack': err.stack
-                    });
-                }
-                d(err);
-            } finally {
-                if (span) {
-                    if (j._error === 'TTL exceeded') {
+                try {
+                    if (!this.ddTracer) {
+                        await Promise.resolve(task.call(ctrl, j, d));
+                    } else {
+                        span = this.ddTracer.startSpan('worker.task');
                         span.addTags({
-                            'error.type': j._error,
-                            'error.msg': `Task execution time exceeded TTL of ${j._ttl} milliseconds`,
+                            'resource.name': metadata.name,
+                            'service.name': this.ddServiceName,
+                        });
+        
+                        await this.ddTracer.scope().activate(span, () => {
+                            return task.call(ctrl, j, d);
                         });
                     }
-                    span.finish();
+                } catch (err) {
+                    if (span) {
+                        span.addTags({
+                            'error.type': err.name,
+                            'error.msg': err.message,
+                            'error.stack': err.stack
+                        });
+                    }
+                    d(err);
+                } finally {
+                    if (span) {
+                        if (j._error === 'TTL exceeded') {
+                            span.addTags({
+                                'error.type': j._error,
+                                'error.msg': `Task execution time exceeded TTL of ${j._ttl} milliseconds`,
+                            });
+                        }
+                        span.finish();
+                    }
                 }
-            }
-        });
+            });
+        }
         this.tasks[metadata.name] = metadata;
     }
 
