@@ -42,7 +42,9 @@ export class KueService {
                 },
             };
         }
-        this.autoStartProcessing = (eval(process.env.KUE_START_PROCESSING) || true);
+
+        const kueStartProcessing = process.env.KUE_START_PROCESSING || 'true';
+        this.autoStartProcessing = kueStartProcessing === 'true';
 
         this.queues[KueService.DEFAULT_QUEUE_NAME] = this.createQueue(KueService.DEFAULT_QUEUE_NAME);
         if ((eval(process.env.KUE_UI_ENABLED) || false)) {
