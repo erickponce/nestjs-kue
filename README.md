@@ -135,6 +135,13 @@ createJob(@Res() res) {
 KUE_DEBUG=true
 ```
 
+## Kue daemon autostart
+By default Kue daemon will start when you register one task. If you want to disable Kue Daemon on any process/container, set the KUE_START_PROCESSING environment variable:
+
+```node
+KUE_START_PROCESSING=false
+```
+
 ## Datadog integration
 
 **From version 0.3.0 and above, there are the ability to send execution stats to datadog monitoring service: [Datadog](https://www.datadoghq.com)**

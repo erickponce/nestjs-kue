@@ -1,6 +1,6 @@
 {
   "name": "nestjs-kue",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Kue wrapper for NestJS framework",
   "author": "Erick Ponce Leão <erickponceleao@gmail.com>",
   "license": "MIT",
