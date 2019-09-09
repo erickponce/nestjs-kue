@@ -7,7 +7,7 @@ const source = 'src';
 const dist = 'dist';
 
 gulp.task('default', function () {
-    gulp.watch([`./${source}/**/*.ts`, `${source}/*.ts`, `./package.json`], [moduleName, 'copy']);
+    gulp.watch([`./${source}/**/*.ts`, `${source}/*.ts`, `./package.json`], gulp.series([moduleName, 'copy']));
 });
 
 gulp.task(moduleName, () => {
