@@ -142,6 +142,19 @@ By default Kue daemon will start when you register one task. If you want to disa
 KUE_START_PROCESSING=false
 ```
 
+## Redis sentinel configuration
+This module support redis sentinel, you need to setup env variable like this
+
+```node
+# SENTINEL CONFIG
+KUE_REDIS_SENTINEL=true
+KUE_REDIS_SENTINEL_HOST=redis-sentinel-0,redis-sentinel-1,redis-sentinel-2 // NAME OF SENTINEL IN YOUR CLUSTER
+KUE_REDIS_SENTINEL_PORT=26379,26379,26379 // PORT OF EACH SENTINEL IN YOUR CLUSTER
+KUE_REDIS_SENTINEL_MASTER=name-of-master
+```
+
+You can set the `KUE_REDIS_SENTINEL` at **false** for disabled redis sentinel
+
 ## Datadog integration
 
 **From version 0.3.0 and above, there are the ability to send execution stats to datadog monitoring service: [Datadog](https://www.datadoghq.com)**
