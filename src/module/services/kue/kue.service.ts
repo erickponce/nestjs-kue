@@ -26,7 +26,7 @@ export class KueService {
     private ddTracer;
     private ddServiceName: string;
     private autoStartProcessing: boolean;
-    private sentinelActive: any;
+    private sentinelActive: boolean;
 
     constructor(
         private readonly fancyLogger: FancyLoggerService,
@@ -34,8 +34,13 @@ export class KueService {
         this.autoStartProcessing = (eval(process.env.KUE_START_PROCESSING) || false);
         this.sentinelActive = (eval(process.env.KUE_REDIS_SENTINEL) || false);
 
-        this.queues[KueService.DEFAULT_QUEUE_NAME] = !this.sentinelActive ? this.redisConfigForQueue() : this.sentinelConfigForQueue();
+        this.queues[KueService.DEFAULT_QUEUE_NAME] = !this.sentinelActive 
+            ? this.redisConfigForQueue()
+            : this.sentinelConfigForQueue();
 
+        if (this.sentinelActive) {
+            this.fancyLogger.info('KueModule', 'redis sentinel are enabled');
+        }
 
         if ((eval(process.env.KUE_UI_ENABLED) || false)) {
             const uiPort: number = parseInt(process.env.KUE_UI_PORT, null) || 3050;
@@ -45,35 +50,39 @@ export class KueService {
     }
 
 
-    sentinelConfigForQueue() {
-        if (process.env.KUE_REDIS_SENTINEL_MASTER === undefined || process.env.KUE_REDIS_SENTINEL_PORT === undefined || process.env.KUE_REDIS_SENTINEL_HOST === undefined) {
+    private sentinelConfigForQueue() {
+        if (process.env.KUE_REDIS_SENTINEL_MASTER === undefined 
+            || process.env.KUE_REDIS_SENTINEL_PORT === undefined 
+            || process.env.KUE_REDIS_SENTINEL_HOST === undefined) {
             this.fancyLogger.info('KueModule', `A config env is missing for redis sentinel`);
-            return this.redisConfigForQueue()
+            return this.redisConfigForQueue();
         }
-        const masterName = process.env.KUE_REDIS_SENTINEL_MASTER, sentinelOpts = {},
-            sentinelHost = process.env.KUE_REDIS_SENTINEL_HOST, sentinelPort = process.env.KUE_REDIS_SENTINEL_PORT.split(',').map(e => parseInt(e));;
+        const masterName = process.env.KUE_REDIS_SENTINEL_MASTER;
+        const sentinelHost = process.env.KUE_REDIS_SENTINEL_HOST;
+        const sentinelPort = process.env.KUE_REDIS_SENTINEL_PORT.split(',').map(e => parseInt(e));
 
         const sentinelHostMap = sentinelHost.split(',').map((e, i) => {
             return {
                 host: e,
-                port: sentinelPort[i]
+                port: sentinelPort[i],
             }
         });
 
         const config = {
             redis: {
-                createClientFactory: function () {
+                createClientFactory: () => {
                     return new Redis({
                         sentinels: sentinelHostMap,
-                        name: masterName
+                        name: masterName,
                     });
                 }
             }
         };
+
         return this.createQueue(KueService.DEFAULT_QUEUE_NAME, config);
     }
 
-    redisConfigForQueue() {
+    private redisConfigForQueue() {
         if (process.env.KUE_REDIS_URI) {
             this.redisConfig = {
                 ...this.redisConfig, redis: process.env.KUE_REDIS_URI,
@@ -97,8 +106,8 @@ export class KueService {
     }
 
     registerTask(task: (job, done) => void, metadata: TaskMetadata, ctrl: Controller) {
-        let queueName: string = metadata.queue || KueService.DEFAULT_QUEUE_NAME;
-        let concurrency: number = metadata.concurrency || KueService.DEFAULT_CONCURRENCY;
+        const queueName: string = metadata.queue || KueService.DEFAULT_QUEUE_NAME;
+        const concurrency: number = metadata.concurrency || KueService.DEFAULT_CONCURRENCY;
         if (!this.queues[queueName]) {
             this.queues[queueName] = this.createQueue(queueName, this.redisConfig);
         }
@@ -145,7 +154,7 @@ export class KueService {
         this.tasks[metadata.name] = metadata;
     }
 
-    private createQueue(queueName: string, config): kue.Queue {
+    private createQueue(queueName: string, config: Object): kue.Queue {
         let queue: kue.Queue = kue.createQueue(config);
         queue.setMaxListeners(0);
 
